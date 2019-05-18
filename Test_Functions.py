@@ -1,5 +1,5 @@
 from scipy.sparse import csr_matrix,lil_matrix
-from scipy.sparse.linalg import norm
+from scipy.sparse.linalg import norm, inv
 import numpy as np
 import math
 from Functions import ConstructDp, ConstructDm, ConstructPpminv
@@ -19,7 +19,7 @@ def test_ConstructDpDm():
                       [0,0,0,-1,1],\
                       [0,0,0,-1,1]])/dx
     
-    pluserror = norm(Dp-TDp)
+    perr = norm(Dp-TDp)
     
     Dm  = ConstructDm(dx,N)
     TDm = csr_matrix([[-1,1,0,0,0,0],\
@@ -27,9 +27,9 @@ def test_ConstructDpDm():
                       [0,0,-1,1,0,0],\
                       [0,0,0,-1,1,0],\
                       [0,0,0,0,-1,1]])/dx
-    minuserror = norm(Dm-TDm)
+    merr = norm(Dm-TDm)
 
-    eps = pluserror+minuserror
+    eps = perr+merr
     assert eps < 0.001
 
 def test_ConstructPpminv():
@@ -54,9 +54,23 @@ def test_ConstructPpminv():
     eps          = norm(Ppinv-TPpinv)+norm(Pminv-TPminv)
     assert eps < 0.001
 
-#test_ConstructDp():
-#   #    Dp = ConstructDp(dx,4)
-#    Dm = ConstructDm(dx,4)
+
+#def CheckSBPProperty():
+#    #This routine will check that the finite difference 
+#    #operators and the inner product matrices satisfy the
+#    #SBP property at least when N = 4
 #
-#    Pp = inv(PPlusinv)
-#    Pm = inv(Pminusinv)
+#    N  = 4
+#    dx = 2/N
+#
+#    Dp           = ConstructDp(dx,N)
+#    Dm           = ConstructDm(dx,N)
+#    Ppinv, Pminv = ConstructPpminv(dx,N)
+#    Pp           = inv(Ppinv)
+#    Pm           = inv(Pminv)
+#
+#    Qp = Pp.dot(Dp)
+#    Qm = Pm.dot(Dm)
+#
+#    Q = Qp + Qm.transpose()
+#    assert 1 < 2
