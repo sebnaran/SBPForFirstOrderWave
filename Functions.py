@@ -5,42 +5,45 @@ import math
 ##These functions relate to the initiation of the code and mesh
 ##building.
 
-def StaggeredSpatialMesh(N):
+def StaggeredSpatialMesh(N,a,b):
     #This function creates a pair of staggered mesh of [-1,1]
     #It takes the number of subpartitions and returns the 
     #two grids alongside with the mesh size dx.
-    dx     = 2/N
-    xplus  = [-1+dx*i for i in range(N+1)]
-    xminus = [-1+dx/2+dx*i for i in range(N)]
-    xminus = [-1] + xminus + [1]
+    if b < a:
+        print('The interval is not well defined b < a')
+        return 
+    dx = (b-a)/N
+    xp = [a+dx*i for i in range(N+1)]
+    xm = [a+dx/2+dx*i for i in range(N)]
+    xm = [a] + xminus + [b]
     return xplus,xminus,dx
 
-def ConstructDp(dx,N):
+def ConstructDm(dx,N):
     #Here we will build the finite difference operator from xplus    #grid to the xminus grid.
-    Dplus          = lil_matrix((N+2,N+1))
-    Dplus[0,0]     = -1
-    Dplus[0,1]     = 1
-    Dplus[N+1,N]   = 1
-    Dplus[N+1,N-1] = -1
+    Dm          = lil_matrix((N+2,N+1))
+    Dm[0,0]     = -1
+    Dm[0,1]     = 1
+    Dm[N+1,N]   = 1
+    Dm[N+1,N-1] = -1
 
     for row in range(1,N+1):
-        Dplus[row,row-1] = -1
-        Dplus[row,row]   = 1
+        Dm[row,row-1] = -1
+        Dm[row,row]   = 1
 
-    Dplus = (1/dx)*Dplus
-    return Dplus.tocsr()
+    Dm = Dm/dx
+    return Dm.tocsr()
     
-def ConstructDm(dx,N):
+def ConstructDp(dx,N):
     #Here we will build the finite difference operator from 
     #xminus to the xplus grid.
-    Dminus = lil_matrix((N+1,N+2))
+    Dp = lil_matrix((N+1,N+2))
 
     for row in range(N+1):
-        Dminus[row,row]   = -1
-        Dminus[row,row+1] = 1
+        Dp[row,row]   = -1
+        Dp[row,row+1] = 1
 
-    Dminus = (1/dx)*Dminus
-    return Dminus.tocsr()
+    Dp = Dp/dx
+    return Dp.tocsr()
 
 def ConstructAtilde(N,dx):
     #In this function we combine the two matrices Dplus and Dminus

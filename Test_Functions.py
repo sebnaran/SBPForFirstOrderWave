@@ -11,23 +11,23 @@ def test_ConstructDpDm():
     N   = 4
     dx  = 2/N
 
-    Dp  = ConstructDp(dx,N)
-    TDp = csr_matrix([[-1,1,0,0,0],\
+    Dm  = ConstructDm(dx,N)
+    TDm = csr_matrix([[-1,1,0,0,0],\
                       [-1,1,0,0,0],\
                       [0,-1,1,0,0],\
                       [0,0,-1,1,0],\
                       [0,0,0,-1,1],\
                       [0,0,0,-1,1]])/dx
     
-    perr = norm(Dp-TDp)
+    merr = norm(Dm-TDm)
     
-    Dm  = ConstructDm(dx,N)
-    TDm = csr_matrix([[-1,1,0,0,0,0],\
+    Dp  = ConstructDp(dx,N)
+    TDp = csr_matrix([[-1,1,0,0,0,0],\
                       [0,-1,1,0,0,0],\
                       [0,0,-1,1,0,0],\
                       [0,0,0,-1,1,0],\
                       [0,0,0,0,-1,1]])/dx
-    merr = norm(Dm-TDm)
+    perr = norm(Dp-TDp)
 
     eps = perr+merr
     assert eps < 0.001
