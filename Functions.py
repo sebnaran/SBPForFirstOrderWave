@@ -37,11 +37,14 @@ def ConstructDp(dx,N):
     #Here we will build the finite difference operator from 
     #xminus to the xplus grid.
     Dp = lil_matrix((N+1,N+2))
-
-    for row in range(N+1):
+    
+    Dp[0,0] = -2
+    Dp[0,1] = 2
+    for row in range(1,N):
         Dp[row,row]   = -1
         Dp[row,row+1] = 1
-
+    Dp[N,N+1] = 2
+    Dp[N,N]   = -2
     Dp = Dp/dx
     return Dp.tocsr()
 
@@ -58,25 +61,25 @@ def ConstructAtilde(N,dx):
 
 def ConstructPpminv(dx,N):
     #Here we build the inner product matrix on the xplus grid.
-    Pplusinv          = lil_matrix((N+1,N+1))
-    Pplusinv.setdiag(1)
-    Pplusinv[0,0]     = 2
-    Pplusinv[N,N] = 2
+    Ppinv          = lil_matrix((N+1,N+1))
+    Ppinv.setdiag(1)
+    Ppinv[0,0]     = 2
+    Ppinv[N,N]     = 2
 
     #And the inner product matrix on the xminus grid.
-    Pminusinv          = lil_matrix((N+2,N+2))
-    Pminusinv.setdiag(1)
-    Pminusinv[0,0]     = 2
-    Pminusinv[1,1]     = 4
-    Pminusinv[2,2]     = 0.8
-    Pminusinv[N+1,N+1] = 2
-    Pminusinv[N,N]     = 4
-    Pminusinv[N-1,N-1] = 0.8
+    Pminv          = lil_matrix((N+2,N+2))
+    Pminv.setdiag(1)
+    Pminv[0,0]     = 2
+    Pminv[1,1]     = 4
+    Pminv[2,2]     = 0.8
+    Pminv[N+1,N+1] = 2
+    Pminv[N,N]     = 4
+    Pminv[N-1,N-1] = 0.8
 
-    Pplusinv  = (1/dx)*Pplusinv
-    Pminusinv = (1/dx)*Pminusinv
+    Ppinv  = Ppinv/dx
+    Pminv  = Pminv/dx
 
-    return Pplusinv.tocsr(), Pminusinv.tocsr()
+    return Ppinv.tocsr(), Pminv.tocsr()
 
 def ConstructPinv(dx,N):
     #Here we build the matrix P

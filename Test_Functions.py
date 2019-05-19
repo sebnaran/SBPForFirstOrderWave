@@ -22,11 +22,11 @@ def test_ConstructDpDm():
     merr = norm(Dm-TDm)
     
     Dp  = ConstructDp(dx,N)
-    TDp = csr_matrix([[-1,1,0,0,0,0],\
+    TDp = csr_matrix([[-2,2,0,0,0,0],\
                       [0,-1,1,0,0,0],\
                       [0,0,-1,1,0,0],\
                       [0,0,0,-1,1,0],\
-                      [0,0,0,0,-1,1]])/dx
+                      [0,0,0,0,-2,2]])/dx
     perr = norm(Dp-TDp)
 
     eps = perr+merr
@@ -51,8 +51,26 @@ def test_ConstructPpminv():
                                [0,0,0,0,4,0],\
                                [0,0,0,0,0,2]])/dx
     
-    eps          = norm(Ppinv-TPpinv)+norm(Pminv-TPminv)
-    assert eps < 0.0001
+    eps1          = norm(Ppinv-TPpinv)+norm(Pminv-TPminv)
+    assert eps1 < 0.0001
+    
+    Pp  = inv(Ppinv)
+    TPp = csr_matrix([[0.5,0,0,0,0],\
+                      [0,1,0,0,0],\
+                      [0,0,1,0,0],\
+                      [0,0,0,1,0],\
+                      [0,0,0,0,0.5]])*dx
+    
+    Pm  = inv(Pminv)
+    TPm = csr_matrix([[0.5,0,0,0,0,0],\
+                      [0,0.25,0,0,0,0],\
+                      [0,0,1.25,0,0,0],\
+                      [0,0,0,1.25,0,0],\
+                      [0,0,0,0,0.25,0],\
+                      [0,0,0,0,0,0.5]])*dx
+    
+    eps2 = norm(Pp-TPp)+norm(Pm-TPm)
+    assert eps2 < 0.0001
 
 
 def test_SBPProterty():
@@ -60,7 +78,7 @@ def test_SBPProterty():
     #operators and the inner product matrices satisfy the
     #SBP property at least when N = 4
 
-    N  = 4
+    N  = 4 
     dx = 2/N
 
     Dp           = ConstructDp(dx,N)
@@ -69,6 +87,13 @@ def test_SBPProterty():
     Pp           = inv(Ppinv)
     Pm           = inv(Pminv)
 
+#    Pm           = csr_matrix([[0,0,0,0,0,0],\
+#                               [0,1,0,0,0,0],\
+#                               [0,0,1,0,0,0],\
+#                               [0,0,0,1,0,0],\
+#                               [0,0,0,0,1,0],\
+#                               [0,0,0,0,0,0]])*dx
+# 
     Qp = Pp.dot(Dp)
     Qm = Pm.dot(Dm)
 
@@ -88,6 +113,8 @@ def test_SBPProterty():
         
         A = np.array([FA,0,0,0,LA])
         B = np.array([FB,0,0,0,0,LB])
+        #A = np.array([FA,0,0,0,0,0,0,0,LA])
+        #B = np.array([FB,0,0,0,0,0,0,0,0,LB])
         
         err = abs(LB*LA-FB*FA-A.dot(Q.dot(B)))
         assert err < 0.0001
@@ -100,6 +127,8 @@ def test_SBPProterty():
         
         A = np.array([FA,6,8,2,LA])
         B = np.array([FB,-3,-9,2,3,LB])
+        #A = np.array([FA,6,8,2,2,2,2,2,LA])
+        #B = np.array([FB,-3,-9,2,3,3,5,7,9,LB])
         
         err = abs(LB*LA-FB*FA-A.dot(Q.dot(B)))
         assert err < 0.0001
