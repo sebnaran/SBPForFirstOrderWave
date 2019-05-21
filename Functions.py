@@ -15,8 +15,8 @@ def StaggeredSpatialMesh(N,a,b):
     dx = (b-a)/N
     xp = [a+dx*i for i in range(N+1)]
     xm = [a+dx/2+dx*i for i in range(N)]
-    xm = [a] + xminus + [b]
-    return xplus,xminus,dx
+    xm = [a] + xm + [b]
+    return xp,xm,dx
 
 
 def ConstructDm(dx,N):
@@ -68,15 +68,6 @@ def ConstructDp(dx,N):
     Dp = Dp/dx
     return Dp.tocsr()
 
-def ConstructAtilde(N,dx):
-    #In this function we combine the two matrices Dplus and Dminus
-    Dminus              = ConstructDm(dx,N)
-    Dplus               = ConstructDp(dx,N)
-    A = lil_matrix((2*N+3,2*N+3))
-    A[0:N+1, N+1:2*N+3] = Dminus
-    A[N+1:2*N+3, 0:N+1] = Dplus
-    A = A.tocsr()  #Here we change the data structure to one thatis suited for efficient computation.
-    return A
 
 
 def ConstructPpminv(dx,N):
@@ -101,6 +92,25 @@ def ConstructPpminv(dx,N):
 
     return Ppinv.tocsr(), Pminv.tocsr()
 
+def InitE(x):
+    return np.array([math.sin(math.pi*y) for y in x])
+
+def InitH(x):
+    return np.array([math.cos(math.pi*y) for y in x])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def ConstructPinv(dx,N):
     #Here we build the matrix P
     Pplusinv,Pminusinv = ConstructPpm(dx,N)
@@ -112,6 +122,15 @@ def ConstructPinv(dx,N):
     return Pinv
 
 
+def ConstructAtilde(N,dx):
+    #In this function we combine the two matrices Dplus and Dminus
+    Dminus              = ConstructDm(dx,N)
+    Dplus               = ConstructDp(dx,N)
+    A = lil_matrix((2*N+3,2*N+3))
+    A[0:N+1, N+1:2*N+3] = Dminus
+    A[N+1:2*N+3, 0:N+1] = Dplus
+    A = A.tocsr()  #Here we change the data structure to one thatis suited for efficient computation.
+    return A
 
 
 
