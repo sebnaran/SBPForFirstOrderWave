@@ -8,25 +8,27 @@ from Functions import ConstructDp, ConstructDm, ConstructPpminv
 def test_ConstructDpDm():
     #This routine will test that, at least when N = 4, 
     #the finite difference operators are constructed well.
-    N   = 4
+    N   = 5
     dx  = 2/N
 
     Dm  = ConstructDm(dx,N)
-    TDm = csr_matrix([[-1,1,0,0,0],\
-                      [-1,1,0,0,0],\
-                      [0,-1,1,0,0],\
-                      [0,0,-1,1,0],\
-                      [0,0,0,-1,1],\
-                      [0,0,0,-1,1]])/dx
+    TDm = csr_matrix([[-1,1,0,0,0,0],\
+                      [-1,1,0,0,0,0],\
+                      [-0.2,-0.6,0.8,0,0,0],\
+                      [0,0,-1,1,0,0],\
+                      [0,0,0,-0.8,0.6,0.2],\
+                      [0,0,0,0,-1,1],\
+                      [0,0,0,0,-1,1]])/dx
     
     merr = norm(Dm-TDm)
     
     Dp  = ConstructDp(dx,N)
-    TDp = csr_matrix([[-2,2,0,0,0,0],\
-                      [0,-1,1,0,0,0],\
-                      [0,0,-1,1,0,0],\
-                      [0,0,0,-1,1,0],\
-                      [0,0,0,0,-2,2]])/dx
+    TDp = csr_matrix([[-1,0.5,0.5,0,0,0,0],\
+                      [-0.5,-0.25,0.75,0,0,0,0],\
+                      [0,0,-1,1,0,0,0],\
+                      [0,0,0,-1,1,0,0],\
+                      [0,0,0,0,-0.75,0.25,0.5],\
+                      [0,0,0,0,-0.5,-0.5,1]])/dx
     perr = norm(Dp-TDp)
 
     eps = perr+merr
@@ -87,13 +89,13 @@ def test_SBPProterty():
     Pp           = inv(Ppinv)
     Pm           = inv(Pminv)
 
-#    Pm           = csr_matrix([[0,0,0,0,0,0],\
-#                               [0,1,0,0,0,0],\
-#                               [0,0,1,0,0,0],\
-#                               [0,0,0,1,0,0],\
-#                               [0,0,0,0,1,0],\
-#                               [0,0,0,0,0,0]])*dx
-# 
+##    Pm           = csr_matrix([[0,0,0,0,0,0],\
+##                               [0,1,0,0,0,0],\
+##                               [0,0,1,0,0,0],\
+##                               [0,0,0,1,0,0],\
+##                               [0,0,0,0,1,0],\
+##                               [0,0,0,0,0,0]])*dx
+## 
     Qp = Pp.dot(Dp)
     Qm = Pm.dot(Dm)
 

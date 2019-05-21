@@ -18,15 +18,27 @@ def StaggeredSpatialMesh(N,a,b):
     xm = [a] + xminus + [b]
     return xplus,xminus,dx
 
+
 def ConstructDm(dx,N):
     #Here we will build the finite difference operator from xplus    #grid to the xminus grid.
     Dm          = lil_matrix((N+2,N+1))
     Dm[0,0]     = -1
     Dm[0,1]     = 1
+    Dm[1,0]     = -1
+    Dm[1,1]     = 1
+    Dm[2,0]     = -0.2
+    Dm[2,1]     = -0.6
+    Dm[2,2]     = 0.8
+
+    Dm[N-1,N]   = 0.2
+    Dm[N-1,N-1] = 0.6    
+    Dm[N-1,N-2] = -0.8
+    Dm[N,N]     = 1
+    Dm[N,N-1]   = -1
     Dm[N+1,N]   = 1
     Dm[N+1,N-1] = -1
 
-    for row in range(1,N+1):
+    for row in range(3,N-1):
         Dm[row,row-1] = -1
         Dm[row,row]   = 1
 
@@ -38,13 +50,21 @@ def ConstructDp(dx,N):
     #xminus to the xplus grid.
     Dp = lil_matrix((N+1,N+2))
     
-    Dp[0,0] = -2
-    Dp[0,1] = 2
-    for row in range(1,N):
+    Dp[0,0] = -1
+    Dp[0,1] = 0.5
+    Dp[0,2] = 0.5
+    Dp[1,0] = -0.5
+    Dp[1,1] = -0.25
+    Dp[1,2] = 0.75
+    for row in range(2,N-1):
         Dp[row,row]   = -1
         Dp[row,row+1] = 1
-    Dp[N,N+1] = 2
-    Dp[N,N]   = -2
+    Dp[N,N+1]   = 1
+    Dp[N,N]     = -0.5
+    Dp[N,N-1]   = -0.5
+    Dp[N-1,N+1] = 0.5
+    Dp[N-1,N]   = 0.25
+    Dp[N-1,N-1] = -0.75
     Dp = Dp/dx
     return Dp.tocsr()
 
