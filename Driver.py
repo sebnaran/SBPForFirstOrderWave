@@ -23,12 +23,27 @@ Pm           = inv(pminv)
 E            = InitE(xp)
 H            = InitH(xm)
 
-Ener         = eps*E.dot(Pp.dot(E))+mu*H.dot(Pm.dot(H))
-print(Ener)
+#for i in range(TN):
+#    Ener = eps*E.dot(Pp.dot(E))+mu*H.dot(Pm.dot(H))
+#    print(Ener)
+#    E    = E+dt*Dp.dot(H)
+#    H    = H+dt*Dm.dot(E)
+
 for i in range(TN):
     Ener = eps*E.dot(Pp.dot(E))+mu*H.dot(Pm.dot(H))
     print(Ener)
-    E    = E+dt*Dp.dot(H)
-    H    = H+dt*Dm.dot(E)
+    
+    Ek1 = dt*Dp.dot(H)
+    Hk1 = dt*Dm.dot(E)
+    
+    Ek2 = dt*Dp.dot(H+Hk1/2)
+    Hk2 = dt*Dm.dot(E+Ek1/2)
 
+    Ek3 = dt*Dp.dot(H+Hk2/2)
+    Hk3 = dt*Dm.dot(E+Ek2/2)
 
+    Ek4 = dt*Dp.dot(H+Hk3)
+    Hk4 = dt*Dm.dot(E+Ek3)
+
+    E   = E+(Ek1+2*Ek2+2*Ek3+Ek4)/6
+    H   = H+(Hk1+2*Hk2+2*Hk3+Hk4)/6
