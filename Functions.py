@@ -18,6 +18,22 @@ def StaggeredSpatialMesh(N,a,b):
     xm = [a] + xm + [b]
     return xp,xm,dx
 
+def InterfaceMesh(N,I):
+    #It is assumed that a and b are lists of the points where there is an 
+    #interface. This function will return two lists of meshes, one for each 
+    #different material. These meshes will be collocated at the material 
+    #interfaces and staggered in the interior of each material.
+
+    n = len(I)
+
+    
+    xp = [[]]*(n-1)
+    xm = [[]]*(n-1)
+    for i in range(n-1):
+        xp[i], xm[i], dx = StaggeredSpatialMesh(N,I[i],I[i+1])
+    return xp, xm, dx        
+
+    
 
 def ConstructDm(dx,N):
     #Here we will build the finite difference operator from xplus    #grid to the xminus grid.

@@ -2,9 +2,10 @@ from scipy.sparse import csr_matrix,lil_matrix
 from scipy.sparse.linalg import norm, inv
 import numpy as np
 import math
-from Functions import ConstructDp, ConstructDm, ConstructPpminv
+from Functions import *
 
-
+#These functions test the SBP construction of the SBP matrices and the SBP
+#Property
 def test_ConstructDpDm():
     #This routine will test that, at least when N = 4, 
     #the finite difference operators are constructed well.
@@ -135,5 +136,23 @@ def test_SBPProterty():
         err = abs(LB*LA-FB*FA-A.dot(Q.dot(B)))
         assert err < 0.0001
 
+#Here we test the construction of the mesh
+
+def test_InterfaceMesh():
+    N          = 2
+    I          = [-1,0,1]
+    xp, xm, dx = InterfaceMesh(N,I)
+    
+    Txp        = np.array([[-1,-0.5,0],[0,0.5,1]])
+    Txm        = np.array([[-1,-0.75,-0.25,0],[0,0.25,0.75,1]])
+    xp         = np.array(xp)
+    xm         = np.array(xm)
+    
+    eps        = np.linalg.norm(xp-Txp) + np.linalg.norm(xm-Txm)
+    #print(xp-Txp)
+    #print(xm-Txm)
+    #print(xp)
+    #print(xm)
+    assert eps < 0.0001
 
 
