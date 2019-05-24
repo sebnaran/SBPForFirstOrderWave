@@ -142,32 +142,11 @@ def ConstructAtilde(N,dx):
     #In this function we combine the two matrices Dplus and Dminus
     Dminus              = ConstructDm(dx,N)
     Dplus               = ConstructDp(dx,N)
-    A = lil_matrix((2*N+3,2*N+3))
+    A                   = lil_matrix((2*N+3,2*N+3))
     A[0:N+1, N+1:2*N+3] = Dminus
     A[N+1:2*N+3, 0:N+1] = Dplus
-    A = A.tocsr()  #Here we change the data structure to one thatis suited for efficient computation.
+    A                   = A.tocsr()  #Here we change the data structure to one thatis suited for efficient computation.
     return A
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
