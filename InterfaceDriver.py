@@ -15,24 +15,25 @@ dt           = CFL*dx
 TN           = math.ceil(T/dt)
 NI           = len(I)-1
 
-Dm           = [[]]*NI
-Dp           = [[]]*NI
-Ppinv        = [[]]*NI
-Pminv        = [[]]*NI
-Pp           = [[]]*NI
-Pm           = [[]]*NI
-E            = [[]]*NI
-H            = [[]]*NI
+
+Dm           = ConstructDm(dx,N)
+Dp           = ConstructDp(dx,N)
+Ppinv, Pminv = ConstructPpminv(dx,N)
+
+Dm           = [ Dm ]*NI
+Dp           = [ Dm ]*NI
+Pp           = [ inv(Ppinv) ]*NI
+Pm           = [ inv(Pminv) ]*NI
+Ppinv        = [ Ppinv ]*NI
+Pminv        = [ Pminv ]*NI
 AD1          = [ csr_matrix( ([-0.5],([N],[0]) ),shape=(N+1,1))  ]*NI
-AD2          = [ csr_matrix( ([ 0.5],([N],[0]) ),shape=(N+2,1))  ]*NI 
+AD2          = [ csr_matrix( ([ 0.5],([0],[0]) ),shape=(N+2,1))  ]*NI
+
+E            = [ [] ]*NI
+H            = [ [] ]*NI
 Ener         = 0
 for i in range(NI):
 
-    Dm[i]              = ConstructDm(dx,N)
-    Dp[i]              = ConstructDp(dx,N)
-    Ppinv[i], Pminv[i] = ConstructPpminv(dx,N)
-    Pp[i]              = inv(Ppinv[i])
-    Pm[i]              = inv(Pminv[i])
     E[i]               = InitE(xp[i])
     H[i]               = InitH(xm[i])
     Ener               = Ener+eps[i]*E[i].dot( Pp[i].dot(E[i]) )\
@@ -42,12 +43,19 @@ print(Ener)
 
 
 
-#This time integration uses an Euler Step.
-#for i in range(TN):
-#    Ener = eps*E.dot(Pp.dot(E))+mu*H.dot(Pm.dot(H))
-#    print(Ener)
-#    E    = E+dt*Dp.dot(H)
-#    H    = H+dt*Dm.dot(E)
+This time integration uses an Euler Step.
+for j in range(TN):
+    
+    E    = E+dt*Dp.dot(H)
+    H    = H+dt*Dm.dot(E)
+    
+    Ener = 0
+    
+    for i in range(IN):
+        Ener = Ener+eps[i]*E[i].dot( Pp[i].dot(E[i]) )\
+                             +mu[i]*H[i].dot(  Pm[i].dot(H[i]) )
+
+    print(Ener)
 
 
 #This time integration uses an RK4 method.
