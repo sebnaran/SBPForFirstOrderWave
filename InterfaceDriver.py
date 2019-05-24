@@ -85,4 +85,3 @@ print(Ener)
 #print(E[len(E)-1])
 #print(H[0])
 #print(H[len(H)-1])
-

@@ -153,24 +153,3 @@ def ConstructAtilde(N,dx):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
