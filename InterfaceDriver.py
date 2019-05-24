@@ -23,16 +23,10 @@ Pp           = [[]]*NI
 Pm           = [[]]*NI
 E            = [[]]*NI
 H            = [[]]*NI
-AE           = [[]]*NI
-AH           = [[]]*NI 
+AD1          = [ csr_matrix( ([-0.5],([N],[0]) ),shape=(N+1,1))  ]*NI
+AD2          = [ csr_matrix( ([ 0.5],([N],[0]) ),shape=(N+2,1))  ]*NI 
 Ener         = 0
 for i in range(NI):
-    
-    AE[i]              = csr_matrix((N+1,1))
-    AE[i
-    AH[i]              = csr_matrix((N+2,1))
-
-
 
     Dm[i]              = ConstructDm(dx,N)
     Dp[i]              = ConstructDp(dx,N)
@@ -41,8 +35,8 @@ for i in range(NI):
     Pm[i]              = inv(Pminv[i])
     E[i]               = InitE(xp[i])
     H[i]               = InitH(xm[i])
-    Ener               = Ener+eps[i]*E[i].dot(Pp[i].dot(E[i]))\
-                             +mu[i]*H[i].dot(Pm[i].dot(H[i]))
+    Ener               = Ener+eps[i]*E[i].dot( Pp[i].dot(E[i]) )\
+                             +mu[i]*H[i].dot(  Pm[i].dot(H[i]) )
 
 print(Ener)
 
