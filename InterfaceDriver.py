@@ -3,11 +3,11 @@ from scipy.sparse.linalg import norm, inv
 from Functions import *
 import math
 
-N            = 10 
+N            = 1000 
 I            = [-1,0,1]
 eps          = [1,2]
 mu           = [1,2]
-CFL          = 0.5
+CFL          = 0.1
 T            = 1
 
 xp,xm,dx     = InterfaceMesh(N,I)
@@ -21,13 +21,26 @@ Dp           = ConstructDp(dx,N)
 Ppinv, Pminv = ConstructPpminv(dx,N)
 
 Dm           = [ Dm ]*NI
-Dp           = [ Dm ]*NI
+Dp           = [ Dp ]*NI
 Pp           = [ inv(Ppinv) ]*NI
 Pm           = [ inv(Pminv) ]*NI
 Ppinv        = [ Ppinv ]*NI
 Pminv        = [ Pminv ]*NI
-AD1          = [ csr_matrix( ([-0.5],([N],[0]) ),shape=(N+1,1))  ]*NI
-AD2          = [ csr_matrix( ([ 0.5],([0],[0]) ),shape=(N+2,1))  ]*NI
+
+
+AD11         = np.zeros(N+1)
+AD11[N]      = -0.5
+AD12         = np.zeros(N+2)
+AD12[N+1]    = -0.5
+
+AD21         = np.zeros(N+1)
+AD21[0]      = 0.5
+AD22         = np.zeros(N+2)
+AD22[0]      = 0.5
+
+
+#AD1          = [ csr_matrix( ([-0.5],([N],[0]) ),shape=(N+1,1))  ]*NI
+#AD2          = [ csr_matrix( ([ 0.5],([0],[0]) ),shape=(N+2,1))  ]*NI
 
 E            = [ [] ]*NI
 H            = [ [] ]*NI
@@ -43,15 +56,34 @@ print(Ener)
 
 
 
-This time integration uses an Euler Step.
+#This time integration uses an Euler Step.
 for j in range(TN):
     
-    E    = E+dt*Dp.dot(H)
-    H    = H+dt*Dm.dot(E)
+    HN   = H[0][len(H[0])-1]
+    H0   = H[1][0]
+
+    EN   = E[0][len(E[0])-1]
+    E0   = E[1][0]
+
+    
+    E[0] = E[0]+dt*( Dp[0].dot(H[0])+\
+                     Ppinv[0].dot(AD11)*( HN-H0 ) )\
+                     /eps[0]
+            
+    H[0] = H[0]+dt*( Dm[0].dot(E[0])+\
+                   ( EN-E0 )*Pminv[0].dot(AD12) )\
+                    /mu[0]      
+    
+    E[1] = E[1]+dt*( Dp[1].dot(H[1])+\
+                    ( H0-HN )*Ppinv[1].dot(AD21) )\
+                    /eps[1]
+
+    H[1] = H[1]+dt*( Dm[1].dot(E[1])+\
+                   ( E0-EN )*Pminv[0].dot(AD22) )\
+                    /mu[1]
     
     Ener = 0
-    
-    for i in range(IN):
+    for i in range(NI):
         Ener = Ener+eps[i]*E[i].dot( Pp[i].dot(E[i]) )\
                              +mu[i]*H[i].dot(  Pm[i].dot(H[i]) )
 
