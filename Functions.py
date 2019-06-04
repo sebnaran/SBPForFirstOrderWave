@@ -1,5 +1,6 @@
 from scipy.sparse import csr_matrix
 from scipy.sparse import lil_matrix
+from scipy.integrate import ode
 import numpy as np
 import math
 ##These functions relate to the initiation of the code and mesh
@@ -114,39 +115,73 @@ def InitE(x):
 def InitH(x):
     return np.array([math.cos(math.pi*y) for y in x])
 
+def EoRetrieve(EH,N):
+    return EH[0:N+1]
+
+def EtRetrieve(EH,N):
+    return EH[N+1:2*N+2]
+
+def HoRetrieve(EH,N):
+    return EH[2*N+2:3*N+4]
+
+def HtRetrieve(EH,N):
+    return EH[3*N+4:4*N+6]
+
+def EoSet(EH,N,Eo):
+    if len(Eo) == N+1:
+        EH[0:N+1] = Eo
+        return EH
+    else:
+        print('wrong size of Eo')
+    return
+
+def EtSet(EH,N,Et):
+    if len(Et) == N+1:
+        EH[N+1:2*N+2] = Et
+        return EH
+    else:
+        print('wrong size of Et')
+    return
+
+def HoSet(EH,N,Ho):
+    if len(Ho) == N+2:
+        EH[2*N+2:3*N+4] = Ho
+        return EH
+    else:
+        print('wrong size of Ho')
+    return
+
+def HtSet(EH,N,Ht):
+    if len(Ht) == N+2:
+        EH[3*N+4:4*N+6] = Ht
+        return EH
+    else:
+        print('wrong size of Ht')
+    return
 
 
 
 
-
-
-
-
-
-
-
-
-
-def ConstructPinv(dx,N):
-    #Here we build the matrix P
-    Pplusinv,Pminusinv = ConstructPpm(dx,N)
-    
-    Pinv = lil_matrix((2*N+3,2*N+3))
-    Pinv[0:N+2,0:N+2] = Pminusinv
-    Pinv[N+2:2*N+3,N+2:2*N+3] = Pplusinv
-    Pinv = Pinv.tocsr()
-    return Pinv
-
-
-def ConstructAtilde(N,dx):
-    #In this function we combine the two matrices Dplus and Dminus
-    Dminus              = ConstructDm(dx,N)
-    Dplus               = ConstructDp(dx,N)
-    A                   = lil_matrix((2*N+3,2*N+3))
-    A[0:N+1, N+1:2*N+3] = Dminus
-    A[N+1:2*N+3, 0:N+1] = Dplus
-    A                   = A.tocsr()  #Here we change the data structure to one thatis suited for efficient computation.
-    return A
+#def ConstructPinv(dx,N):
+#    #Here we build the matrix P
+#    Pplusinv,Pminusinv = ConstructPpm(dx,N)
+#    
+#    Pinv = lil_matrix((2*N+3,2*N+3))
+#    Pinv[0:N+2,0:N+2] = Pminusinv
+#    Pinv[N+2:2*N+3,N+2:2*N+3] = Pplusinv
+#    Pinv = Pinv.tocsr()
+#    return Pinv
+#
+#
+#def ConstructAtilde(N,dx):
+#    #In this function we combine the two matrices Dplus and Dminus
+#    Dminus              = ConstructDm(dx,N)
+#    Dplus               = ConstructDp(dx,N)
+#    A                   = lil_matrix((2*N+3,2*N+3))
+#    A[0:N+1, N+1:2*N+3] = Dminus
+#    A[N+1:2*N+3, 0:N+1] = Dplus
+#    A                   = A.tocsr()  #Here we change the data structure to one thatis suited for efficient computation.
+#    return A
 
 
 

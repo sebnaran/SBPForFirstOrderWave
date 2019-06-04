@@ -155,4 +155,38 @@ def test_InterfaceMesh():
     #print(xm)
     assert eps < 0.0001
 
+def test_SettingRetrieving():
+
+    N  = 5
+    EH = np.zeros(4*N+6)
+
+    Eo = np.array([0,1,2,3,4,5])
+    Et = np.array([6,7,8,9,10,11])
+
+    Ho = np.array([12,13,14,15,16,17,18])
+    Ht = np.array([19,20,21,22,23,24,25])
+    
+    EH = EoSet(EH,N,Eo)
+    EH = EtSet(EH,N,Et)
+    EH = HoSet(EH,N,Ho)
+    EH = HtSet(EH,N,Ht)
+
+    TEo = EoRetrieve(EH,N)
+    TEt = EtRetrieve(EH,N)
+    THo = HoRetrieve(EH,N)
+    THt = HtRetrieve(EH,N)
+    
+    err = np.linalg.norm(Eo-TEo)+\
+          np.linalg.norm(Et-TEt)+\
+          np.linalg.norm(Ho-THo)+\
+          np.linalg.norm(Ht-THt)
+    assert err<0.0001
+    
+
+
+
+
+
+
+
 
