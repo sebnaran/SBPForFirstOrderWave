@@ -111,9 +111,20 @@ def ConstructPpminv(dx,N):
 
 def InitE(x):
     return np.array([math.sin(math.pi*y) for y in x])
-
+    
 def InitH(x):
-    return np.array([math.cos(math.pi*y) for y in x])
+    return np.array([-math.cos(math.pi*y) for y in x])
+
+def ExactE(x,t):
+    sol = [math.sin(math.pi*y)*(math.cos(math.pi*t)+\
+                                math.sin(math.pi*t)) for y in x]
+    return np.array(sol)
+
+def ExactH(x,t):
+    sol = [math.cos(math.pi*y)*(math.sin(math.pi*t)-\
+                                math.cos(math.pi*t)) for y in x]
+    return np.array(sol)
+
 
 def EoRetrieve(EH,N):
     return EH[0:N+1]

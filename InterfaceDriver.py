@@ -4,11 +4,11 @@ from scipy.integrate import odeint
 from Functions import *
 import math
 
-N            = 10 
+N            = 1000 
 I            = [-1,0,1]
 eps          = [1,2]
 mu           = [1,2]
-CFL          = 0.1
+CFL          = 0.05
 T            = 1
 
 xp,xm,dx     = InterfaceMesh(N,I)
@@ -85,23 +85,68 @@ def Func(EH,t):
     EH = HtSet(EH,N,THt)
     return EH
 
+#for j in range(TN):
+#    EH = EH+dt*Func(EH,0)
+#
+#    Eo = EoRetrieve(EH,N)
+#    Et = EtRetrieve(EH,N)
+#    Ho = HoRetrieve(EH,N)
+#    Ht = HtRetrieve(EH,N)
+#
+#    Ener = eps[0]*Eo.dot( Pp[0].dot(Eo) )+mu[0]*Ho.dot( Pm[0].dot(Ho) )+\
+#       eps[1]*Et.dot( Pp[1].dot(Et) )+mu[1]*Ht.dot( Pm[1].dot(Ht) )
+#    print(Ener)
+#
+
 for j in range(TN):
-
-    k1 = dt*Func(EH,0)
-    k2 = dt*Func(EH+0.5*k1,0)
-    k3 = dt*Func(EH+0.5*k2,0)
-    k4 = dt*Func(EH+k3,0)
     
-    EH = EH + (k1+2*k2+2*k3+k4)/6
-    Eo = EoRetrieve(EH,N)
-    Et = EtRetrieve(EH,N)
-    Ho = HoRetrieve(EH,N)
-    Ht = HtRetrieve(EH,N)
+    HN   = H[0][len(H[0])-1]
+    H0   = H[1][0]
 
-    Ener = eps[0]*Eo.dot( Pp[0].dot(Eo) )+mu[0]*Ho.dot( Pm[0].dot(Ho) )+\
-       eps[1]*Et.dot( Pp[1].dot(Et) )+mu[1]*Ht.dot( Pm[1].dot(Ht) )
+    EN   = E[0][len(E[0])-1]
+    E0   = E[1][0]
+
+    
+    E[0] = E[0]+dt*( Dp[0].dot(H[0])+\
+                     Ppinv[0].dot(AD11)*( HN-H0 ) )\
+                     /eps[0]
+            
+    H[0] = H[0]+dt*( Dm[0].dot(E[0])+\
+                   ( EN-E0 )*Pminv[0].dot(AD12) )\
+                    /mu[0]      
+    
+    E[1] = E[1]+dt*( Dp[1].dot(H[1])+\
+                    ( H0-HN )*Ppinv[1].dot(AD21) )\
+                    /eps[1]
+
+    H[1] = H[1]+dt*( Dm[1].dot(E[1])+\
+                   ( E0-EN )*Pminv[0].dot(AD22) )\
+                    /mu[1]
+    
+    Ener = 0
+    for i in range(NI):
+        Ener = Ener+eps[i]*E[i].dot( Pp[i].dot(E[i]) )\
+                             +mu[i]*H[i].dot(  Pm[i].dot(H[i]) )
+
     print(Ener)
 
+#for j in range(TN):
+#
+#    k1 = dt*Func(EH,0)
+#    k2 = dt*Func(EH+0.5*k1,0)
+#    k3 = dt*Func(EH+0.5*k2,0)
+#    k4 = dt*Func(EH+k3,0)
+#    
+#    EH = EH + (k1+2*k2+2*k3+k4)/6
+#    Eo = EoRetrieve(EH,N)
+#    Et = EtRetrieve(EH,N)
+#    Ho = HoRetrieve(EH,N)
+#    Ht = HtRetrieve(EH,N)
+#
+#    Ener = eps[0]*Eo.dot( Pp[0].dot(Eo) )+mu[0]*Ho.dot( Pm[0].dot(Ho) )+\
+#       eps[1]*Et.dot( Pp[1].dot(Et) )+mu[1]*Ht.dot( Pm[1].dot(Ht) )
+#    print(Ener)
+#
 
 
 

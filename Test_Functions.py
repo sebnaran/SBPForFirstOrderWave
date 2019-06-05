@@ -181,9 +181,28 @@ def test_SettingRetrieving():
           np.linalg.norm(Ho-THo)+\
           np.linalg.norm(Ht-THt)
     assert err<0.0001
+   
+
+def test_Aij():
+    N         = 5
+    AD11      = np.zeros(N+1)
+    AD11[N]   = -0.5
+    AD12      = np.zeros(N+2)
+    AD12[N+1] = -0.5
+
+    AD21         = np.zeros(N+1)
+    AD21[0]      = 0.5
+    AD22         = np.zeros(N+2)
+    AD22[0]      = 0.5
     
+    
+    E = np.array([1,2,3,4,5,6])
+    H = np.array([10,11,12,13,14,15,16])
 
-
+    assert E.dot(AD11)+3   < 0.001
+    assert E.dot(AD21)-0.5 < 0.001
+    assert H.dot(AD12)+8   < 0.001
+    assert H.dot(AD22)-5   < 0.001
 
 
 
