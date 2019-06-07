@@ -4,12 +4,12 @@ from scipy.integrate import odeint
 from Functions import *
 import math
 
-N            = 100 
+N            = 10000 
 I            = [-1,0,1]
 eps          = [1,2]
 mu           = [1,1]
 CFL          = 0.05
-T            = 1 
+T            = 0.1 
 
 xp,xm,dx     = InterfaceMesh(N,I)
 dt           = CFL*dx
@@ -56,74 +56,70 @@ for i in range(NI):
 print(Ener)
 
 
-for j in range(TN):
-    
-    HN   = H[0][len(H[0])-1]
-    H0   = H[1][0]
-
-    EN   = E[0][len(E[0])-1]
-    E0   = E[1][0]
-
-    
-    E[0] = E[0]+dt*( Dp[0].dot(H[0])+\
-                     Ppinv[0].dot(AD11)*( HN-H0 ) )\
-                     /eps[0]
-            
-    H[0] = H[0]+dt*( Dm[0].dot(E[0])+\
-                   ( EN-E0 )*Pminv[0].dot(AD12) )\
-                    /mu[0]      
-    
-    E[1] = E[1]+dt*( Dp[1].dot(H[1])+\
-                    ( H0-HN )*Ppinv[1].dot(AD21) )\
-                    /eps[1]
-
-    H[1] = H[1]+dt*( Dm[1].dot(E[1])+\
-                   ( E0-EN )*Pminv[0].dot(AD22) )\
-                    /mu[1]
- 
-    for i in range(NI):
-        Ener = Ener+eps[i]*E[i].dot( Pp[i].dot(E[i]) )\
-                             +mu[i]*H[i].dot(  Pm[i].dot(H[i]) )
-
-    print(Ener)
-
-
-
-
-
-
-
-
-
-#EH = np.zeros(4*N+6)
-#
-#EH = EoSet(EH,N,E[0])
-#EH = EtSet(EH,N,E[1])
-#EH = HoSet(EH,N,H[0])
-#EH = HtSet(EH,N,H[1])
-#
-#
-#def Func(EH,t):
-#    Eo = EoRetrieve(EH,N)
-#    Et = EtRetrieve(EH,N)
-#    Ho = HoRetrieve(EH,N)
-#    Ht = HtRetrieve(EH,N) 
-#
-#    HN   = Ho[len(Ho)-1]
-#    H0   = Ht[0]
-#    EN   = Eo[len(Eo)-1]
-#    E0   = Et[0]
+#for j in range(TN):
 #    
-#    TEo = (Dp[0].dot(Ho)+Ppinv[0].dot(AD11)*(HN-H0))/eps[0]
-#    THo = (Dm[0].dot(Eo)+Pminv[0].dot(AD12)*(EN-E0))/mu[0]
-#    TEt = (Dp[1].dot(Ht)+Ppinv[1].dot(AD21)*(H0-HN))/eps[1]
-#    THt = (Dm[1].dot(Et)+Pminv[1].dot(AD22)*(E0-EN))/mu[1]
+#    HN   = H[0][len(H[0])-1]
+#    H0   = H[1][0]
 #
-#    EH = EoSet(EH,N,TEo)
-#    EH = EtSet(EH,N,TEt)
-#    EH = HoSet(EH,N,THo)
-#    EH = HtSet(EH,N,THt)
-#    return EH
+#    EN   = E[0][len(E[0])-1]
+#    E0   = E[1][0]
+#
+#    
+#    E[0] = E[0]+(dt/eps[0])*( Dp[0].dot(H[0])+\
+#                             ( HN-H0 )*Ppinv[0].dot(AD11) )
+#            
+#    H[0] = H[0]+(dt/mu[0])*( Dm[0].dot(E[0])+\
+#                   ( EN-E0 )*Pminv[0].dot(AD12) )     
+#    
+#    E[1] = E[1]+(dt/eps[1])*( Dp[1].dot(H[1])+\
+#                    ( H0-HN )*Ppinv[1].dot(AD21) )
+#
+#    H[1] = H[1]+(dt/mu[1])*( Dm[1].dot(E[1])+\
+#                   ( E0-EN )*Pminv[0].dot(AD22) )
+# 
+#    for i in range(NI):
+#        Ener = Ener+eps[i]*E[i].dot( Pp[i].dot(E[i]) )\
+#                             +mu[i]*H[i].dot(  Pm[i].dot(H[i]) )
+#
+#    print(Ener)
+
+
+
+
+
+
+
+
+
+EH = np.zeros(4*N+6)
+
+EH = EoSet(EH,N,E[0])
+EH = EtSet(EH,N,E[1])
+EH = HoSet(EH,N,H[0])
+EH = HtSet(EH,N,H[1])
+
+
+def Func(EH,t):
+    Eo = EoRetrieve(EH,N)
+    Et = EtRetrieve(EH,N)
+    Ho = HoRetrieve(EH,N)
+    Ht = HtRetrieve(EH,N) 
+
+    HN   = Ho[len(Ho)-1]
+    H0   = Ht[0]
+    EN   = Eo[len(Eo)-1]
+    E0   = Et[0]
+    
+    TEo = (Dp[0].dot(Ho)+Ppinv[0].dot(AD11)*(HN-H0))/eps[0]
+    THo = (Dm[0].dot(Eo)+Pminv[0].dot(AD12)*(EN-E0))/mu[0]
+    TEt = (Dp[1].dot(Ht)+Ppinv[1].dot(AD21)*(H0-HN))/eps[1]
+    THt = (Dm[1].dot(Et)+Pminv[1].dot(AD22)*(E0-EN))/mu[1]
+
+    EH = EoSet(EH,N,TEo)
+    EH = EtSet(EH,N,TEt)
+    EH = HoSet(EH,N,THo)
+    EH = HtSet(EH,N,THt)
+    return EH
 
 #for j in range(TN):
 #    EH = EH+dt*Func(EH,0)
@@ -136,7 +132,7 @@ for j in range(TN):
 #    Ener = eps[0]*Eo.dot( Pp[0].dot(Eo) )+mu[0]*Ho.dot( Pm[0].dot(Ho) )+\
 #       eps[1]*Et.dot( Pp[1].dot(Et) )+mu[1]*Ht.dot( Pm[1].dot(Ht) )
 #    print(Ener)
-#
+
 
    
 #    Ener = 0
@@ -148,7 +144,7 @@ for j in range(TN):
 
 
 
-print(err)
+#print(err)
 
 #for j in range(TN):
 #
@@ -184,19 +180,20 @@ print(err)
 
 
 
-#t = np.linspace(0,1,1000)
+t  = np.linspace(0,T,TN)
 #
-#EH = odeint(Func,EH,t)
+EH = odeint(Func,EH,t)
 #
-#EH = EH[49,:]
-#Eo = EoRetrieve(EH,N)
-#Et = EtRetrieve(EH,N)
-#Ho = HoRetrieve(EH,N)
-#Ht = HtRetrieve(EH,N)
+
+EH = EH[TN-1,:]
+Eo = EoRetrieve(EH,N)
+Et = EtRetrieve(EH,N)
+Ho = HoRetrieve(EH,N)
+Ht = HtRetrieve(EH,N)
 #
-#Ener = eps[0]*Eo.dot( Pp[0].dot(Eo) )+mu[0]*Ho.dot( Pm[0].dot(Ho) )+\
-#       eps[1]*Et.dot( Pp[1].dot(Et) )+mu[1]*Ht.dot( Pm[1].dot(Ht) )
-#print(Ener)
+Ener = eps[0]*Eo.dot( Pp[0].dot(Eo) )+mu[0]*Ho.dot( Pm[0].dot(Ho) )+\
+       eps[1]*Et.dot( Pp[1].dot(Et) )+mu[1]*Ht.dot( Pm[1].dot(Ht) )
+print(Ener)
 
 
 
@@ -246,10 +243,10 @@ print(err)
 #    print(Ener)
 
 
-ExE1 = IntExactE(xp[0])
-ExE2 = IntExactE(xp[1])
-ExH1 = IntExactH(xm[0])
-ExH2 = IntExactH(xm[1])
+ExE1 = IntExactE(xp[0],T)
+ExE2 = IntExactE(xp[1],T)
+ExH1 = IntExactH(xm[0],T)
+ExH2 = IntExactH(xm[1],T)
 
 E1err = ExE1-E[0]
 E2err = ExE2-E[1]
@@ -260,7 +257,7 @@ err = E1err.dot(Pp[0].dot(E1err))+E2err.dot(Pp[1].dot(E2err))+\
       H1err.dot(Pm[0].dot(H1err))+H2err.dot(Pm[1].dot(H2err))
 err = math.sqrt(err)
 
-
+print(err)
 
 
 

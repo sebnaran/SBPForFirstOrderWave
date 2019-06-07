@@ -204,6 +204,117 @@ def test_Aij():
     assert H.dot(AD12)+8   < 0.001
     assert H.dot(AD22)-5   < 0.001
 
+def test_TimeDeriv():
+
+    N            = 100  
+    I            = [-1,0,1]
+    eps          = [1,2]
+    mu           = [1,1]
+
+    xp,xm,dx     = InterfaceMesh(N,I)
+    NI           = len(I)-1
+
+
+    Dm           = ConstructDm(dx,N)
+    Dp           = ConstructDp(dx,N)
+    Ppinv, Pminv = ConstructPpminv(dx,N)
+
+    Pp           = [ inv(Ppinv) ]*NI
+    Pm           = [ inv(Pminv) ]*NI
+    Ppinv        = [ Ppinv ]*NI
+    Pminv        = [ Pminv ]*NI
+
+
+    AD11         = np.zeros(N+1)
+    AD11[N]      = -0.5
+    AD12         = np.zeros(N+2)
+    AD12[N+1]    = -0.5
+
+    AD21         = np.zeros(N+1)
+    AD21[0]      = 0.5
+    AD22         = np.zeros(N+2)
+    AD22[0]      = 0.5
+
+
+    E            = [ [] ]*NI
+    H            = [ [] ]*NI
+    for i in range(NI):
+
+        E[i]               = IntInitE(xp[i])
+        H[i]               = IntInitH(xm[i])
+
+    def Func(EH,t):
+        Eo = EoRetrieve(EH,N)
+        Et = EtRetrieve(EH,N)
+        Ho = HoRetrieve(EH,N)
+        Ht = HtRetrieve(EH,N)
+        
+        HN   = Ho[len(Ho)-1]
+        H0   = Ht[0]
+        EN   = Eo[len(Eo)-1]
+        E0   = Et[0]
+
+        TEo = (Dp[0].dot(Ho)+Ppinv[0].dot(AD11)*(HN-H0))/eps[0]
+        THo = (Dm[0].dot(Eo)+Pminv[0].dot(AD12)*(EN-E0))/mu[0]
+        TEt = (Dp[1].dot(Ht)+Ppinv[1].dot(AD21)*(H0-HN))/eps[1]
+        THt = (Dm[1].dot(Et)+Pminv[1].dot(AD22)*(E0-EN))/mu[1]
+        
+        EH = EoSet(EH,N,TEo)
+        EH = EtSet(EH,N,TEt)
+        EH = HoSet(EH,N,THo)
+        EH = HtSet(EH,N,THt)
+        return EH
+
+    EH = np.zeros(4*N+6)
+
+    EH = EoSet(EH,N,E[0])
+    EH = EtSet(EH,N,E[1])
+    EH = HoSet(EH,N,H[0])
+    EH = HtSet(EH,N,H[1])
+    
+    TEo = EoRetrieve(EH,N)
+    TEt = EtRetrieve(EH,N)
+    THo = HoRetrieve(EH,N)
+    THt = HtRetrieve(EH,N)
+    
+    print( Dm[0].dot(TEo) )
+    print( Dm[0].dot(E[0]) )
+    EH = Func(EH,0)
+
+    TEo = EoRetrieve(EH,N)
+    TEt = EtRetrieve(EH,N)
+    THo = HoRetrieve(EH,N)
+    THt = HtRetrieve(EH,N)
+
+    HN   = H[0][len(H[0])-1]
+    H0   = H[1][0]
+    EN   = E[0][len(E[0])-1]
+    E0   = E[1][0]
+    
+    
+    NEo = (Dp[0].dot(H[0])+Ppinv[0].dot(AD11)*(HN-H0))/eps[0]
+    NHo = (Dm[0].dot(E[0])+Pminv[0].dot(AD12)*(EN-E0))/mu[0]
+    NEt = (Dp[1].dot(H[1])+Ppinv[1].dot(AD21)*(H0-HN))/eps[1]
+    NHt = (Dm[1].dot(E[1])+Pminv[1].dot(AD22)*(E0-EN))/mu[1]
+    
+
+
+    errEo = np.linalg.norm(TEo-NEo)
+    errEt = np.linalg.norm(TEt-NEt)
+    errHo = np.linalg.norm(THo-NHo)
+    errHt = np.linalg.norm(THt-NHt)
+    
+    
+    assert errEo < 0.001
+    assert errEt < 0.001
+    assert errHo < 0.001
+    assert errHt < 0.001
+
+
+
+           
+
+
 
 
 
