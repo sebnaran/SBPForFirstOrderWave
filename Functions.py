@@ -3,6 +3,7 @@ from scipy.sparse import lil_matrix
 from scipy.integrate import ode
 import numpy as np
 import math
+from math import cos,sin,pi
 ##These functions relate to the initiation of the code and mesh
 ##building.
 
@@ -109,21 +110,71 @@ def ConstructPpminv(dx,N):
 
     return Ppinv.tocsr(), Pminv.tocsr()
 
-def InitE(x):
+def NoIntInitE(x):
     return np.array([math.sin(math.pi*y) for y in x])
     
-def InitH(x):
+def NoIntInitH(x):
     return np.array([-math.cos(math.pi*y) for y in x])
 
-def ExactE(x,t):
+def NoIntExactE(x,t):
     sol = [math.sin(math.pi*y)*(math.cos(math.pi*t)+\
                                 math.sin(math.pi*t)) for y in x]
     return np.array(sol)
 
-def ExactH(x,t):
+def NoIntExactH(x,t):
     sol = [math.cos(math.pi*y)*(math.sin(math.pi*t)-\
                                 math.cos(math.pi*t)) for y in x]
     return np.array(sol)
+
+def IntInitE(x):
+    def f(xi):
+        if xi<0:
+            return cos(2*pi*xi)+2*sin(2*pi*xi)
+        else:
+            return cos(4*pi*xi)+sin(4*pi*xi)
+    return np.array([f(y) for y in x])
+            
+def IntInitH(x):
+    def f(xi):
+        if xi<0:
+            return -2*cos(2*pi*xi)+sin(2*pi*xi)
+        else:
+            return -2*cos(4*pi*xi)+2*sin(4*pi*xi)
+    return np.array([f(y) for y in x])
+
+
+
+def IntExactE(x,t):
+    def f(xi,t):
+        if xi<0:
+            eval = cos(2*pi*t)*cos(2*pi*xi)+\
+                 2*cos(2*pi*t)*sin(2*pi*xi)+\
+                   sin(2*pi*t)*cos(2*pi*xi)+\
+                 2*sin(2*pi*t)*sin(2*pi*xi)
+            return eval
+        else:
+            eval = cos(2*pi*t)*cos(4*pi*xi)+\
+                   cos(2*pi*t)*sin(4*pi*xi)+\
+                   sin(2*pi*t)*cos(4*pi*xi)+\
+                   sin(2*pi*t)*sin(4*pi*xi)
+            return eval
+    return np.array([f(y,t) for y in x])
+
+def IntExactH(x,t):
+    def f(xi,t):
+        if xi<0:
+            eval = -2*cos(2*pi*t)*cos(2*pi*xi)+\
+                      cos(2*pi*t)*sin(2*pi*xi)+\
+                      sin(2*pi*t)*cos(2*pi*xi)+\
+                    2*sin(2*pi*t)*sin(2*pi*xi)
+            return eval
+        else:
+            eval = -2*cos(2*pi*t)*cos(4*pi*xi)+\
+                    2*cos(2*pi*t)*sin(4*pi*xi)+\
+                    2*sin(2*pi*t)*cos(4*pi*xi)+\
+                   -2*sin(2*pi*t)*sin(4*pi*xi)
+            return eval
+    return np.array([f(y,t) for y in x])
 
 
 def EoRetrieve(EH,N):
