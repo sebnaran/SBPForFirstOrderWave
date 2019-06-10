@@ -85,7 +85,7 @@ by = log10(upaxis);
 ty = ay:(by-ay)/10:by;
 ty = 10.^(ty);
 
-ylabel('Error On Electric Field')
+ylabel('L2 Error')
 
 xticks(tx)
 yticks(ty)
@@ -152,7 +152,7 @@ by = log10(upaxis);
 ty = ay:(by-ay)/10:by;
 ty = 10.^(ty);
 
-ylabel('Error On Electric Field')
+ylabel('L2 Error')
 
 xticks(tx)
 yticks(ty)
@@ -240,7 +240,7 @@ by = log10(upaxis);
 ty = ay:(by-ay)/10:by;
 ty = 10.^(ty);
 
-ylabel('Error On Electric Field')
+ylabel('L2 Error')
 
 xticks(tx)
 yticks(ty)
@@ -307,7 +307,7 @@ by = log10(upaxis);
 ty = ay:(by-ay)/10:by;
 ty = 10.^(ty);
 
-ylabel('Error On Electric Field')
+ylabel('L2 Error')
 
 xticks(tx)
 yticks(ty)
