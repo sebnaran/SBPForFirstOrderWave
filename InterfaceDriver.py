@@ -4,12 +4,12 @@ from scipy.integrate import odeint
 from Functions import *
 import math
 
-N            = 4
+N            = 1280
 I            = [-1,0,1]
-eps          = [1,1]
+eps          = [1,4]
 mu           = [1,1]
-CFL          = 0.05
-T            = 0.1 
+CFL          = 0.5
+T            = 1 
 
 xp,xm,dx     = InterfaceMesh(N,I)
 dt           = CFL*dx
@@ -49,88 +49,98 @@ Et = IntInitE(xp[1])
 Ht = IntInitH(xm[1])
 
 
-Ener = (eps[0]*Eo.dot(Pp.dot(Eo))+mu[0]*Ho.dot(Pm.dot(Ho))+\
+EnerI = (eps[0]*Eo.dot(Pp.dot(Eo))+mu[0]*Ho.dot(Pm.dot(Ho))+\
         eps[1]*Et.dot(Pp.dot(Et))+mu[1]*Ht.dot(Pm.dot(Ht)))/2 
 
-print(Ener)
 
-EH = np.zeros(4*N+6)
 
-EH = EoSet(EH,N,Eo)
-EH = EtSet(EH,N,Et)
-EH = HoSet(EH,N,Ho)
-EH = HtSet(EH,N,Ht)
+#EH = np.zeros(4*N+6)
 
-def tDeriv(EH,t):
-    
-    Eo = EoRetrieve(EH,N)
-    Et = EtRetrieve(EH,N)
-    Ho = HoRetrieve(EH,N)
-    Ht = HtRetrieve(EH,N)
-
-    HoN   = Ho[len(Ho)-1]
-    Ht0   = Ht[0]
-    EoN   = Eo[len(Eo)-1]
-    Et0   = Et[0]
-
-    Ho0   = Ho[0]
-    HtN   = Ht[len(Ht)-1]
-    Eo0   = Eo[0]
-    EtN   = Et[len(Et)-1]
-
-    TEo = (Dp.dot(Ho)+\
-           Ppinv.dot(A1)*(HoN-Ht0)+\
-           Ppinv.dot(B1)*(Ho0-HtN))/eps[0]
-    THo = (Dm.dot(Eo)+\
-           Pminv.dot(A2)*(EoN-Et0)+\
-           Pminv.dot(B2)*(Eo0-EtN))/mu[0]
-    TEt = (Dp.dot(Ht)+\
-           Ppinv.dot(A3)*(Ht0-HoN)+\
-           Ppinv.dot(B3)*(HtN-Ho0))/eps[1]
-    THt = (Dm.dot(Et)+\
-           Pminv.dot(A4)*(Et0-EoN)+\
-           Pminv.dot(B4)*(EtN-Eo0))/mu[1]
-
-    EH = EoSet(EH,N,TEo)
-    EH = EtSet(EH,N,TEt)
-    EH = HoSet(EH,N,THo)
-    EH = HtSet(EH,N,THt)
-    return EH
+#EH = EoSet(EH,N,Eo)
+#EH = EtSet(EH,N,Et)
+#EH = HoSet(EH,N,Ho)
+#EH = HtSet(EH,N,Ht)
 
 #RungeKutta4
-#for j in range(TN):
-#
-#    k1 = dt*tDeriv(EH,0)
-#    k2 = dt*tDeriv(EH+0.5*k1,0)
-#    k3 = dt*tDeriv(EH+0.5*k2,0)
-#    k4 = dt*tDeriv(EH+k3,0)
-#
-#    EH = EH + (k1+2*k2+2*k3+k4)/6
 
-#Euler Step
+def PtDeriv(Eo,Et,Ho,Ht):
+    TEo,TEt,THo,THt = tDeriv(Eo,Et,Ho,Ht,0,eps,mu,Dp,Dm,Ppinv,Pminv,A1,A2,A3,A4,B1,B2,B3,B4,N)
+    return TEo,TEt,THo,THt
+
+for j in range(TN):
+     
+    tEo,tEt,tHo,tHt = PtDeriv(Eo,Et,Ho,Ht)
+
+    Eok1 = dt*tEo
+    Hok1 = dt*tHo
+    Etk1 = dt*tEt   
+    Htk1 = dt*tHt   
+    
+    tEo,tEt,tHo,tHt = PtDeriv(Eo+0.5*Eok1,Et+0.5*Etk1,Ho+0.5*Hok1,Ht+0.5*Htk1)
+
+    Eok2 = dt*tEo
+    Hok2 = dt*tHo
+    Etk2 = dt*tEt 
+    Htk2 = dt*tHt 
+
+    tEo,tEt,tHo,tHt = PtDeriv(Eo+0.5*Eok2,Et+0.5*Etk2,Ho+0.5*Hok2,Ht+0.5*Htk2)
+
+    Eok3 = dt*tEo
+    Hok3 = dt*tHo
+    Etk3 = dt*tEt
+    Htk3 = dt*tHt
+
+    tEo,tEt,tHo,tHt = PtDeriv(Eo+Eok3,Et+Etk3,Ho+Hok3,Ht+Htk3)
+
+    Eok4 = dt*tEo
+    Hok4 = dt*tHo
+    Etk4 = dt*tEt
+    Htk4 = dt*tHt
+
+
+    Eo = Eo+(Eok1+2*Eok2+2*Eok3+Eok4)/6 
+    Ho = Ho+(Hok1+2*Hok2+2*Hok3+Hok4)/6
+    Et = Et+(Etk1+2*Etk2+2*Etk3+Etk4)/6
+    Ht = Ht+(Htk1+2*Htk2+2*Htk3+Htk4)/6
+
+#    Ener = eps[0]*Eo.dot( Pp.dot(Eo) )+mu[0]*Ho.dot( Pm.dot(Ho) )+\
+#           eps[1]*Et.dot( Pp.dot(Et) )+mu[1]*Ht.dot( Pm.dot(Ht) )/2
+#    print(Ener)
+
+
+
 
 #for j in range(TN):
-#    EH = EH+dt*tDeriv(EH,0)
+#    tEo,tEt,tHo,tHt = tDeriv(Eo,Et,Ho,Ht,0,eps,mu,Dp,Dm,Ppinv,Pminv,A1,A2,A3,A4,B1,B2,B3,B4,N)
+#
+#    Eo = Eo+dt*tEo
+#    Ho = Ho+dt*tHo
+#    Et = Et+dt*tEt
+#    Ht = Ht+dt*tHt
+##
+#    Ener = eps[0]*Eo.dot( Pp.dot(Eo) )+mu[0]*Ho.dot( Pm.dot(Ho) )+\
+#       eps[1]*Et.dot( Pp.dot(Et) )+mu[1]*Ht.dot( Pm.dot(Ht) )/2
+#    print(Ener)
+
 
 
 
 
 #This uses a time integrator from scypy.
-t  = np.linspace(0,T,TN)
-EH = odeint(tDeriv,EH,t)
-EH = EH[TN-1,:]
+#t  = np.linspace(0,T,TN)
+#EH = odeint(tDeriv,EH,t)
+#EH = EH[TN-1,:]
 
 
-Eo = EoRetrieve(EH,N)
-Et = EtRetrieve(EH,N)
-Ho = HoRetrieve(EH,N)
-Ht = HtRetrieve(EH,N)
-###
-Ener = eps[0]*Eo.dot( Pp.dot(Eo) )+mu[0]*Ho.dot( Pm.dot(Ho) )+\
-       eps[1]*Et.dot( Pp.dot(Et) )+mu[1]*Ht.dot( Pm.dot(Ht) )/2
-print(Ener)
+#Eo = EoRetrieve(EH,N)
+#Et = EtRetrieve(EH,N)
+#Ho = HoRetrieve(EH,N)
+#Ht = HtRetrieve(EH,N)
 
 
+EnerF = eps[0]*Eo.dot(Pp.dot(Eo))+mu[0]*Ho.dot(Pm.dot(Ho)) +\
+       eps[1]*Et.dot(Pp.dot(Et))+mu[1]*Ht.dot(Pm.dot(Ht))/2
+print(EnerF)
 
 ExEo = IntExactE(xp[0],T)
 ExEt = IntExactE(xp[1],T)
@@ -142,10 +152,13 @@ Eterr = ExEt-Et
 Hoerr = ExHo-Ho
 Hterr = ExHt-Ht
 
-err = Eoerr.dot(Pp.dot(Eoerr))+Eterr.dot(Pp.dot(Eterr))+\
-      Hoerr.dot(Pm.dot(Hoerr))+Hterr.dot(Pm.dot(Hterr))
+Eerr = Eoerr.dot(Pp.dot(Eoerr))+Eterr.dot(Pp.dot(Eterr))
+Herr = Hoerr.dot(Pm.dot(Hoerr))+Hterr.dot(Pm.dot(Hterr))
 
-err = math.sqrt(err)
+Eerr = math.sqrt(Eerr)
+Herr = math.sqrt(Herr)
 
-print(err)
+print(Eerr)
+print(Herr)
+
 

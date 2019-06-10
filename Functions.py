@@ -165,8 +165,8 @@ def IntExactH(x,t):
         if xi<0:
             eval = -2*cos(2*pi*t)*cos(2*pi*xi)+\
                       cos(2*pi*t)*sin(2*pi*xi)+\
-                      sin(2*pi*t)*cos(2*pi*xi)+\
-                    2*sin(2*pi*t)*sin(2*pi*xi)
+                    2*sin(2*pi*t)*cos(2*pi*xi)+\
+                   -1*sin(2*pi*t)*sin(2*pi*xi)
             return eval
         else:
             eval = -2*cos(2*pi*t)*cos(4*pi*xi)+\
@@ -220,6 +220,55 @@ def HtSet(EH,N,Ht):
     else:
         print('wrong size of Ht')
     return
+
+def tDeriv(Eo,Et,Ho,Ht,t,eps,mu,Dp,Dm,Ppinv,Pminv,A1,A2,A3,A4,B1,B2,B3,B4,N):
+
+    #Eo = EoRetrieve(EEH,N)
+    #Et = EtRetrieve(EEH,N)
+    #Ho = HoRetrieve(EEH,N)
+    #Ht = HtRetrieve(EEH,N)
+
+    HoN   = Ho[len(Ho)-1]
+    Ht0   = Ht[0]
+    EoN   = Eo[len(Eo)-1]
+    Et0   = Et[0]
+
+    Ho0   = Ho[0]
+    HtN   = Ht[len(Ht)-1]
+    Eo0   = Eo[0]
+    EtN   = Et[len(Et)-1]
+
+    TEo = (Dp.dot(Ho)+\
+           Ppinv.dot(A1)*(HoN-Ht0)+\
+           Ppinv.dot(B1)*(Ho0-HtN))/eps[0]
+    THo = (Dm.dot(Eo)+\
+           Pminv.dot(A2)*(EoN-Et0)+\
+           Pminv.dot(B2)*(Eo0-EtN))/mu[0]
+    TEt = (Dp.dot(Ht)+\
+           Ppinv.dot(A3)*(Ht0-HoN)+\
+           Ppinv.dot(B3)*(HtN-Ho0))/eps[1]
+    THt = (Dm.dot(Et)+\
+           Pminv.dot(A4)*(Et0-EoN)+\
+           Pminv.dot(B4)*(EtN-Eo0))/mu[1]
+
+    #EEH = EoSet(EEH,N,TEo)
+    #EEH = EtSet(EEH,N,TEt)
+    #EEH = HoSet(EEH,N,THo)
+    #EEH = HtSet(EEH,N,THt)
+    return TEo,TEt,THo,THt
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
